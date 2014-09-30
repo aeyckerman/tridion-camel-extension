@@ -1,0 +1,97 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+    <description>This is storage layer spring context configuration</description>
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="com.tridion.storage,com.tridion.broker.querying.generators.dao"/>
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:camel.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Amazon S3 Client Configuation -->
+    <bean id="s3Configuration" class="com.tridion.camel.configuration.S3Configuration">
+        <property name="awsBucketName" value="${aws.bucketName}"/>
+        <property name="awsAccessKey" value="${aws.accessKey}"/>
+        <property name="awsSecretKey" value="${aws.secretKey}"/>
+        <property name="awsRegion" value="${aws.region}"/>
+    </bean>
+
+    <bean id="s3AmazonClient" class="com.amazonaws.services.s3.AmazonS3Client">
+        <constructor-arg index="0" ref="awsCredentials"/>
+        <constructor-arg index="1" ref="configurationOptions"/>
+    </bean>
+
+    <bean id="awsCredentials" class="com.amazonaws.auth.BasicAWSCredentials">
+        <constructor-arg index="0" value="${aws.accessKey}"/>
+        <constructor-arg index="1" value="${aws.secretKey}"/>
+    </bean>
+
+    <bean id="configurationOptions" class="com.amazonaws.ClientConfiguration">
+<!--        <property name="proxyHost" value="${aws.proxyHost}"/>
+        <property name="proxyPort" value="${aws.proxyPort}"/>-->
+    </bean>
+
+    <!-- Mongo DB Configuration -->
+    <mongo:mongo host="${mongo.host}" port="${mongo.port}">
+      <mongo:options connections-per-host="8"
+                       threads-allowed-to-block-for-connection-multiplier="4"
+                       connect-timeout="1000"
+                       max-wait-time="1500"
+                       auto-connect-retry="true"
+                       socket-keep-alive="true"
+                       socket-timeout="1500"
+                       slave-ok="true"
+                       write-number="1"
+                       write-timeout="0"
+                       write-fsync="true"/>
+    </mongo:mongo>
+
+    <bean id="mongodb" class="com.mongodb.MongoClient">
+       <constructor-arg name="uri">
+            <bean class="com.mongodb.MongoClientURI">
+                <constructor-arg name="uri" value="${mongo.uri}"/>
+            </bean>
+        </constructor-arg>
+   </bean>
+
+    <bean id="mongoConfiguration" class="com.tridion.camel.configuration.MongoConfiguration">
+        <property name="mongoHost" value="${mongo.host}"/>
+        <property name="mongoPort" value="${mongo.port}"/>
+        <property name="mongoUser" value="${mongo.user}"/>
+        <property name="mongoPassword" value="${mongo.password}"/>
+        <property name="mongoDB" value="${mongo.db}"/>
+        <property name="mongoCollection" value="${mongo.collection}"/>
+    </bean>
+
+    <!-- S3 Camel Plugin -->
+    <bean id="s3CamelPlugin" class="com.tridion.camel.CamelPlugin">
+        <constructor-arg ref="s3Configuration"/>
+        <constructor-arg ref="s3AmazonClient"/>
+        <constructor-arg ref="mongoConfiguration"/>
+        <constructor-arg ref="mongodb"/>
+    </bean>
+
+    <camel:camelContext id="camelContext" trace="true">
+        <camel:packageScan>
+            <camel:package>com.tridion.camel</camel:package>
+        </camel:packageScan>
+        <camel:dataFormats>
+          <camel:json id="json" library="Jackson"/>
+        </camel:dataFormats>
+    </camel:camelContext>
+</beans>

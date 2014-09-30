@@ -1,0 +1,15 @@
+# Ignore IntelliJ Project Files
+.idea
+logs
+data
+*.iml
+
+# target
+camel-storage-extension/target
+
+# mess around test files
+camel-storage-extension/src/test/resources/test-files
+camel-storage-extension/src/test/resources/META-INF
+
+# personal license
+cd_licenses.xml

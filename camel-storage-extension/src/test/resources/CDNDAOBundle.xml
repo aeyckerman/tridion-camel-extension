@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StorageDAOBundles>
+    <StorageDAOBundle type="filesystem">
+        <StorageDAO typeMapping="Page" class="com.tridion.storage.extensions.filesystem.MongoFSPageDAO"/>
+		<StorageDAO typeMapping="ComponentPresentation" class="com.tridion.storage.filesystem.FSComponentPresentationDAO"/>
+		<StorageDAO typeMapping="Binary" class="com.tridion.storage.extensions.filesystem.S3FSBinaryContentDAO"/>
+		<StorageDAO typeMapping="BinaryVariant" class="com.tridion.storage.filesystem.binaryvariant.FSBinaryVariantDAO"/>
+		<StorageDAO typeMapping="Reference" class="com.tridion.storage.filesystem.FSReferenceEntryDAO"/>
+		<StorageDAO typeMapping="Schema" class="com.tridion.storage.filesystem.FSSchemaDAO"/>
+		<StorageDAO typeMapping="Publication" class="com.tridion.storage.filesystem.FSPublicationDAO"/>
+		<StorageDAO typeMapping="XSLT" class="com.tridion.storage.filesystem.FSXSLTDAO"/>
+		<StorageDAO typeMapping="LinkInfo" class="com.tridion.storage.filesystem.linkinfo.FSLinkInfoDAO"/>
+    </StorageDAOBundle>
+</StorageDAOBundles>

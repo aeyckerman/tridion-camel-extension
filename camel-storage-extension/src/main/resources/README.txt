@@ -1,0 +1,1 @@
+Resources created here will be included in the WAR file
