@@ -253,7 +253,7 @@
 				Configuration example for using filesystem as data storage. 
 			-->
 			<Storage Type="filesystem" Class="com.tridion.storage.extensions.filesystem.CDNFSDAOFactory" Id="defaultFile" defaultFilesystem="false">
-				<Root Path="C:\Data\tridion\stored\Pages" />
+				<Root Path="C:\Data\tridion\stored\Default" />
 			</Storage>
             <Storage Type="filesystem" Class="com.tridion.storage.extensions.filesystem.CDNFSDAOFactory" Id="defaultHtmlFile" defaultFilesystem="false">
                 <Root Path="C:\Data\tridion\stored\Pages" />
@@ -289,7 +289,7 @@
     </Global>
 	<!-- If no item type mappings are defined within ItemTypes or if storages on a lower level do not exist then the storage defined by defaultStorageId attribute will be used.
 		 If storage defined by defaultStorageId does not exist then exception will be thrown. -->
-    <ItemTypes defaultStorageId="defaultMiamiFile" cached="false">
+    <ItemTypes defaultStorageId="defaultFile" cached="false">
 		<!-- Query type mapping is replacement for Query gnenerator. If there was query generator defined in a Broker configuration then  Query type mapping should be binded to default DB. -->
 		<!--
 		<Item typeMapping="Query" storageId="defaultdb"/>
