@@ -20,7 +20,7 @@ This file will alter the default SpringLoader class, to point to a customized ap
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
 	<Steps>
-		<Step Name="SpringLoader" Class="_com.tridion.storage.extensions.configuration.SpringConfigurationLoader_"/>
+		<Step Name="SpringLoader" Class="com.tridion.storage.extensions.configuration.SpringConfigurationLoader"/>
 		<Step Name="BundleLoader" Class="com.tridion.storage.configuration.BundleConfigurationLoader"/>
 		<Step Name="FactoryLoader" Class="com.tridion.storage.configuration.StorageFactoryConfigurationLoader"/>
 		<Step Name="TypeMappingCheckLoader" Class="com.tridion.storage.configuration.ConfigurationMetadataCheckLoader"/>
@@ -87,12 +87,10 @@ This configuration file contains:
 
 ```xml
     …
-    <ItemTypes defaultStorageId="defaultFile" cached="false">
-        <ItemTypes defaultStorageId="defaultResources" cached="false">
-            <Item typeMapping="Page" itemExtension=".html" cached="true" storageId="defaultHtmlFile"/>
-            <Item typeMapping="Page" itemExtension=".json" cached="true" storageId="defaultJsonFile"/>
-            <Item typeMapping="Binary" storageId="defaultDataFile" cached="false" />
-        </ItemTypes>
+    <ItemTypes defaultStorageId="defaultResources" cached="false">
+        <Item typeMapping="Page" itemExtension=".html" cached="true" storageId="defaultHtmlFile"/>
+        <Item typeMapping="Page" itemExtension=".json" cached="true" storageId="defaultJsonFile"/>
+        <Item typeMapping="Binary" storageId="defaultDataFile" cached="false" />
     </ItemTypes>
     …
 ```
