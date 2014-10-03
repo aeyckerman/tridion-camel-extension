@@ -3,7 +3,6 @@ package com.tridion.storage.extensions.filesystem;
 import com.tridion.broker.StorageException;
 import com.tridion.data.CharacterData;
 import com.tridion.storage.dao.PageDAO;
-import com.tridion.storage.extensions.tme.S3Plugin;
 import com.tridion.storage.filesystem.FSEntityManager;
 import com.tridion.storage.filesystem.FSPageDAO;
 import com.tridion.storage.services.LocalThreadTransaction;
@@ -18,7 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Component("S3FSPageDAO")
 @Scope("prototype")
@@ -39,7 +41,6 @@ public class S3FSPageDAO extends FSPageDAO implements PageDAO {
 	
 	public void create(CharacterData page, String relativePath)    throws StorageException
 	{
-        S3Plugin s3Plugin;
         CamelContext camelContext;
         ProducerTemplate template;
         CharacterData cpPage = page;
@@ -54,12 +55,11 @@ public class S3FSPageDAO extends FSPageDAO implements PageDAO {
             log.debug("Page Id: " + cpPage.getId());
 
             camelContext = CDNFSDAOFactory.getCamelContext();
-            s3Plugin = new S3Plugin(camelContext);
 
             template = camelContext.createProducerTemplate();
             Exchange exchange = ExchangeBuilder.anExchange(camelContext)
                                 .withProperty(Exchange.FILE_NAME, relativePath)
-                                .withProperty(Exchange.FILE_LENGTH, s3Plugin.transfer(cpPage.getInputStream()))
+                                .withProperty(Exchange.FILE_LENGTH, transfer(cpPage.getInputStream()))
                                 .withPattern(ExchangePattern.InOut)
                                 .withBody(cpPage.getInputStream())
                                 .withHeader(S3Constants.KEY, relativePath)
@@ -119,5 +119,29 @@ public class S3FSPageDAO extends FSPageDAO implements PageDAO {
 			log.debug("Updated page moved so registered REMOVE action: transaction " + transactionId + ", path " + originalRelativePath );
 		}
 	}
+
+    private int transfer(InputStream inputStream) throws IOException {
+        //BufferedOutputStream output = new BufferedOutputStream(new File(System.getProperty("java.io.tmpdir")+ "toto.file"));
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        try {
+
+
+            int read = 0;
+            byte[] bytes = new byte[1024];
+
+            while ((read = inputStream.read(bytes)) != -1) {
+             output.write(bytes, 0, read);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } finally {
+            output.close();
+            inputStream.close();
+        }
+
+        return output.size();
+
+    }
 
 }

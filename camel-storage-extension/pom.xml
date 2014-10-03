@@ -11,7 +11,7 @@
     <groupId>com.tridion.storage</groupId>
     <artifactId>camel-extension</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2.4-SNAPSHOT</version>
     <name>Camel Storage Extension (S3 and Mongo)</name>
     <url>http://maven.apache.org</url>
 
@@ -25,6 +25,7 @@
         <c3p0.version>0.9.1</c3p0.version>
         <camel.version>2.12.3</camel.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
+        <enforcer.version>1.0.1</enforcer.version>
         <hibernate.version>3.6.3.Final</hibernate.version>
         <jms.version>1.1</jms.version>
         <mongo.version>2.12.3</mongo.version>
@@ -37,82 +38,68 @@
 
     <dependencies>
         <!-- Tridion Dependencies -->
-        <!-- These are not public dependencies, add the cd_* jar files in your classpath
+        <!-- These are not public dependencies, add the cd_* jar files in your classpath -->
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_broker</classifier>
+            <artifactId>cd_broker</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_cache</classifier>
+            <artifactId>cd_cache</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_core</classifier>
+            <artifactId>cd_core</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_datalayer</classifier>
+            <artifactId>cd_datalayer</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_deployer</classifier>
+            <artifactId>cd_deployer</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_linking</classifier>
+            <artifactId>cd_linking</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_model</classifier>
+            <artifactId>cd_model</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_tcdl</classifier>
+            <artifactId>cd_tcdl</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_undo</classifier>
+            <artifactId>cd_undo</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_upload</classifier>
+            <artifactId>cd_upload</artifactId>
             <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.tridion</groupId>
-            <artifactId>tridion-deployer</artifactId>
-            <classifier>cd_wrapper</classifier>
+            <artifactId>cd_wrapper</artifactId>
             <version>7.0.0</version>
         </dependency>
-        -->
-        <!-- and add easylicens.jar as well
+        <!-- and add easylicens.jar as well -->
         <dependency>
           <groupId>com.vs.ezlicrun</groupId>
           <artifactId>easy-license</artifactId>
           <version>25.0</version>
-          <classifier>easylicense</classifier>
         </dependency>
-        -->
 
         <!--CAMEL FRAMEWORK-->
         <dependency>
