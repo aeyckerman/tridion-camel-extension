@@ -62,8 +62,8 @@ public class MongoFSPageDAO extends FSPageDAO implements PageDAO {
         camelContext = CDNFSDAOFactory.getCamelContext();
 
         try {
-            /* Temporary wrapper to make any Page fit into MongoDB ..
-            String pageId = "" + cpPage.getId();
+             // Temporary wrapper to make any Page fit into MongoDB ..
+            /*String pageId = "" + cpPage.getId();
             String json = null;
 
             log.warn("Java Temp Dir: " + System.getProperty("java.io.tmpdir") );

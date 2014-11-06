@@ -70,12 +70,10 @@ public class CamelPlugin {
         @Override
         public void configure() throws Exception {
             from("direct:mongo")
-                    .autoStartup(true)
                     //.unmarshal().json(JsonLibrary.Gson)
                     .setHeader(MongoDbConstants.OPERATION_HEADER, simple("${in.header.CamelMongoDbOperation}"))
                     .to("mongodb://" + mongoUrl);
             from("direct:mongoObject")
-                    .autoStartup(true)
                     .setHeader(MongoDbConstants.OPERATION_HEADER, simple("${in.header.CamelMongoDbOperation}"))
                     .to("mongodb://" + mongoUrl);
         }
@@ -98,7 +96,7 @@ public class CamelPlugin {
         @Override
         public void configure() throws Exception {
             from("direct:awss3")
-                    .autoStartup(true)
+                    .autoStartup(Boolean.valueOf("${properties:aws.autoStart}"))
                     //.setHeader(S3Constants.KEY, method(this, "stripFirstChar(${in.header.CamelFileName})"))
                     //.setHeader(S3Constants.KEY, simple("${properties:aws.prefix}${in.header.CamelFileName}"))
                     .setHeader(S3Constants.KEY, method(this, "stripFirstChar(${properties:aws.prefix}${in.header.CamelFileName})"))
