@@ -29,6 +29,7 @@
         <property name="awsAccessKey" value="${aws.accessKey}"/>
         <property name="awsSecretKey" value="${aws.secretKey}"/>
         <property name="awsRegion" value="${aws.region}"/>
+        <property name="awsPrefix" value="${aws.prefix}"/>
     </bean>
 
     <bean id="s3AmazonClient" class="com.amazonaws.services.s3.AmazonS3Client">
@@ -87,6 +88,7 @@
     </bean>
 
     <camel:camelContext id="camelContext" trace="true">
+        <camel:propertyPlaceholder id="properties" location="classpath:camel.properties"/>
         <camel:packageScan>
             <camel:package>com.tridion.camel</camel:package>
         </camel:packageScan>

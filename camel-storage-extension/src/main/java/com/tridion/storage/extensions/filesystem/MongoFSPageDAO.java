@@ -47,27 +47,40 @@ public class MongoFSPageDAO extends FSPageDAO implements PageDAO {
 	public void create(CharacterData page, String relativePath) throws StorageException
 	{
 
+        DBObject dbObject = null;
         cpPage = page;
-/*        try {
-            dbObject = (DBObject) JSON.parse(buildString(cpPage.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }*/
+
+        log.info("New Page Creation - Interesting to know");
+        log.info("Storage Id: " + getStorageId());
+        log.info("Storage Location: " + getStorageLocation());
+        log.debug("Binding Name: " + getBindingName());
+        log.debug("Type Mapping: " + getTypeMapping());
+        log.debug("Class: " + getClass());
+        log.debug("Page Id: " + cpPage.getId());
+
+        // TODO: fire the camel route and wait for feedback
+        camelContext = CDNFSDAOFactory.getCamelContext();
 
         try {
-            log.info("New Page Creation - Interesting to know");
-            log.info("Storage Id: " + getStorageId());
-            log.info("Storage Location: " + getStorageLocation());
-            log.debug("Binding Name: " + getBindingName());
-            log.debug("Type Mapping: " + getTypeMapping());
-            log.debug("Class: " + getClass());
-            log.debug("Page Id: " + cpPage.getId());
+            /* Temporary wrapper to make any Page fit into MongoDB ..
+            String pageId = "" + cpPage.getId();
+            String json = null;
 
-            // TODO: fire the camel route and wait for feedback
-            camelContext = CDNFSDAOFactory.getCamelContext();
+            log.warn("Java Temp Dir: " + System.getProperty("java.io.tmpdir") );
+            json = "{'_id' : 'tcm-" + pageId.replace(":", "_") + "', 'body' : '" + URLEncoder.encode(cpPage.getString()) + "'}";
+            dbObject = (DBObject)JSON.parse(json);*/
 
-            DBObject dbObject = (DBObject)JSON.parse(cpPage.getString());
+            // Parse the actual json document
+            dbObject = (DBObject)JSON.parse(cpPage.getString());
 
+        } catch (IOException e) {
+            log.error("Looks like json wasn't formatted correctly : " + e.getMessage());
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new StorageException("Camel route failed, abort the transaction");
+        }
+
+
+        try {
             template = camelContext.createProducerTemplate();
             Exchange exchange = ExchangeBuilder.anExchange(camelContext)
                                 .withProperty(Exchange.FILE_NAME, relativePath)
@@ -87,6 +100,7 @@ public class MongoFSPageDAO extends FSPageDAO implements PageDAO {
             }
 
         } catch (Exception e) {
+            log.error("Camel route issue, investigate connection: " + e.getMessage());
             throw new StorageException("Camel route failed, abort the transaction");
         } finally {
             super.create(page, relativePath);
@@ -160,9 +174,11 @@ public class MongoFSPageDAO extends FSPageDAO implements PageDAO {
             log.debug("Type Mapping: " + getTypeMapping());
             log.debug("Class: " + getClass());
             log.debug("Page Id: " + cpPage.getId());
+
             /*System.out.println("Page String: " + cpPage.getString());*/
 
-            // cpPage.
+            // No action performed => calls create
+
         } catch (Exception e) {
             throw new StorageException("Camel route failed, abort the extension");
         }

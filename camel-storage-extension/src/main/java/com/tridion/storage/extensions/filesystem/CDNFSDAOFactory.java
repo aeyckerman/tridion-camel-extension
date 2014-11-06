@@ -44,7 +44,6 @@ public class CDNFSDAOFactory
    	        String tempFileSystemTransactionLocation) {
    		super(storageId, tempFileSystemTransactionLocation);
         CAMEL_CONTEXT = (CamelContext)APPLICATION_CONTEXT.getBean("camelContext");
-        System.out.println("essential -- constructor");
    	}
 
 	public static void registerAction(String transactionId, String itemUrl, Action action)
@@ -107,7 +106,7 @@ public class CDNFSDAOFactory
     // this is some Camel intrusion .. love it
     public static CamelContext getCamelContext() throws StorageException {
         if (CAMEL_CONTEXT != null) {
-            System.out.println("Thx to the Context Awareness we can feed it back to the Storage extensions!! ");
+            // System.out.println("Thx to the Context Awareness we can feed it back to the Storage extensions!! ");
         } else {
             throw new StorageException("no camel context found");
         }

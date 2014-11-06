@@ -87,11 +87,11 @@
     </Processors>
     <!-- Configure the Queue locations the deployer checks for incoming deployment packages -->
     <Queue>
-        <Location Path="/data/tridion/incoming" WindowSize="100" Workers="100" Cleanup="false" Interval="2s"/>
+        <Location Path="C:\Data\tridion\poc-incoming" WindowSize="100" Workers="100" Cleanup="false" Interval="2s"/>
         <!--<Location Path="c:\tridion\work\http" WindowSize="10" Workers="10" Cleanup="true" Interval="30s"/> -->
     </Queue>
     <!-- Configure the HTTPSReceiver to store incoming package in specified location, and configure if deployer should run in process -->
-    <HTTPSReceiver MaxSize="10000000" Location="/data/tridion/incoming" InProcessDeploy="true"/>
+    <HTTPSReceiver MaxSize="10000000" Location="C:\Data\tridion\poc-incoming" InProcessDeploy="true"/>
     <!--
      Specifies the location of the license file.
      -->

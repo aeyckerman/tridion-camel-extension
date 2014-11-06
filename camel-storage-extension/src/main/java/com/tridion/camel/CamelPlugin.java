@@ -14,7 +14,6 @@ import org.apache.camel.component.mongodb.MongoDbConstants;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.util.jndi.JndiContext;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class CamelPlugin {
 
-    private final Logger log;
+    private final org.slf4j.Logger log;
     private final CamelContext camelContext;
     private final JndiRegistry registry;
 
@@ -56,7 +55,6 @@ public class CamelPlugin {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public class MongoRouteBuilder extends RouteBuilder {
@@ -72,10 +70,12 @@ public class CamelPlugin {
         @Override
         public void configure() throws Exception {
             from("direct:mongo")
+                    .autoStartup(true)
                     //.unmarshal().json(JsonLibrary.Gson)
                     .setHeader(MongoDbConstants.OPERATION_HEADER, simple("${in.header.CamelMongoDbOperation}"))
                     .to("mongodb://" + mongoUrl);
             from("direct:mongoObject")
+                    .autoStartup(true)
                     .setHeader(MongoDbConstants.OPERATION_HEADER, simple("${in.header.CamelMongoDbOperation}"))
                     .to("mongodb://" + mongoUrl);
         }
@@ -98,7 +98,10 @@ public class CamelPlugin {
         @Override
         public void configure() throws Exception {
             from("direct:awss3")
-                    .setHeader(S3Constants.KEY, method(this, "stripFirstChar(${in.header.CamelFileName})"))
+                    .autoStartup(true)
+                    //.setHeader(S3Constants.KEY, method(this, "stripFirstChar(${in.header.CamelFileName})"))
+                    //.setHeader(S3Constants.KEY, simple("${properties:aws.prefix}${in.header.CamelFileName}"))
+                    .setHeader(S3Constants.KEY, method(this, "stripFirstChar(${properties:aws.prefix}${in.header.CamelFileName})"))
                     .setHeader(S3Constants.CONTENT_LENGTH, simple("${in.header.CamelFileLength}"))
                     .to("aws-s3://" + s3Url)
                     .log("ETAG for saved resource is ${in.header.CamelAwsS3ETag}");
@@ -106,7 +109,10 @@ public class CamelPlugin {
 
         public String stripFirstChar(String relativePath) {
             try {
-                return relativePath.substring(1);
+                if (relativePath.charAt(0) == '/')
+                    return relativePath.substring(1);
+                else
+                    return relativePath;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

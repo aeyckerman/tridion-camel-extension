@@ -10,6 +10,7 @@ camel-storage-extension/target
 # mess around test files
 camel-storage-extension/src/test/resources/test-files
 camel-storage-extension/src/test/resources/META-INF
+camel-storage-extension/src/test/resources/camel.properties
 
 # personal license
 cd_licenses.xml

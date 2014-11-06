@@ -14,19 +14,10 @@ public class S3Configuration {
     private String awsAccessKey;
     private String awsSecretKey;
     private String awsRegion;
-
-/*    private AWSCredentials awsCredentials;
-    private ClientConfiguration clientConfiguration;
-    private AmazonS3 client;*/
+    private String awsPrefix;
 
     public void S3Configuration() {
-        //System.out.println("Init config");
-  /*      awsCredentials = new BasicAWSCredentials(this.awsAccessKey, this.awsSecretKey);
-
-        clientConfiguration = new ClientConfiguration();
-
-        client = new AmazonS3Client(awsCredentials, clientConfiguration);
-*/
+        // Init Config
     }
 
 
@@ -60,5 +51,13 @@ public class S3Configuration {
 
     public void setAwsRegion(String awsRegion) {
         this.awsRegion = awsRegion;
+    }
+
+    public void setAwsPrefix(String awsPrefix) {
+        this.awsPrefix = awsPrefix;
+    }
+
+    public String getAwsPrefix() {
+        return awsPrefix;
     }
 }

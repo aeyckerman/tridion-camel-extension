@@ -121,7 +121,7 @@ public class S3FSPageDAO extends FSPageDAO implements PageDAO {
 	}
 
     private int transfer(InputStream inputStream) throws IOException {
-        //BufferedOutputStream output = new BufferedOutputStream(new File(System.getProperty("java.io.tmpdir")+ "toto.file"));
+
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         try {
