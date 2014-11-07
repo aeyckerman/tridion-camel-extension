@@ -9,9 +9,9 @@
     </parent>
 
     <groupId>com.tridion.storage</groupId>
-    <artifactId>camel-extension</artifactId>
+    <artifactId>tridion-storage-extension</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.4-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
     <name>Camel Storage Extension (S3 and Mongo)</name>
     <url>http://maven.apache.org</url>
 
@@ -399,7 +399,6 @@
 
     <build>
         <defaultGoal>package</defaultGoal>
-        <finalName>tridion-storage-extension-0.4</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
