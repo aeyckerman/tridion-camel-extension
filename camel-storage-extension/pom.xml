@@ -398,7 +398,7 @@
     </profiles>
 
     <build>
-        <defaultGoal>install</defaultGoal>
+        <defaultGoal>package</defaultGoal>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
