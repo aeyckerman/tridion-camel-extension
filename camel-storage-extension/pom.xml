@@ -399,6 +399,7 @@
 
     <build>
         <defaultGoal>package</defaultGoal>
+        <finalName>tridion-storage-extension-0.4</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
