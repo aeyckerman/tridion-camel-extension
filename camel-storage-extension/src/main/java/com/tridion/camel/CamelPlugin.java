@@ -96,7 +96,7 @@ public class CamelPlugin {
         @Override
         public void configure() throws Exception {
             from("direct:awss3")
-                    .autoStartup(Boolean.valueOf("${properties:aws.autoStart}"))
+                    //.autoStartup(Boolean.valueOf("${properties:aws.autoStart}"))
                     //.setHeader(S3Constants.KEY, method(this, "stripFirstChar(${in.header.CamelFileName})"))
                     //.setHeader(S3Constants.KEY, simple("${properties:aws.prefix}${in.header.CamelFileName}"))
                     .setHeader(S3Constants.KEY, method(this, "stripFirstChar(${properties:aws.prefix}${in.header.CamelFileName})"))
