@@ -47,10 +47,8 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
         BinaryContent cpBinaryContent = binaryContent;
         ByteArrayInputStream is = new ByteArrayInputStream(cpBinaryContent.getContent());
 
-
         CamelContext camelContext;
         ProducerTemplate template;
-        boolean feedback;
 
         try {
             log.info("New Binary Creation - Interesting to know");
@@ -104,6 +102,10 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
 	  public void update(BinaryContent binaryContent, String originalRelativePath, String newRelativePath) throws StorageException
 	  {
           BinaryContent cpBinaryContent = binaryContent;
+          ByteArrayInputStream is = new ByteArrayInputStream(cpBinaryContent.getContent());
+
+          CamelContext camelContext;
+          ProducerTemplate template;
 
           try {
               log.info("Existing Binary Update - Interesting to know");
@@ -114,6 +116,26 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
               log.debug("Class: " + getClass());
               log.info("Object Id: " + cpBinaryContent.getBinaryId());
               log.info("Object Size: " + cpBinaryContent.getObjectSize());
+
+              camelContext = CDNFSDAOFactory.getCamelContext();
+
+              template = camelContext.createProducerTemplate();
+              Exchange exchange = ExchangeBuilder.anExchange(camelContext)
+                                  .withProperty(Exchange.FILE_NAME, newRelativePath)
+                                  /*.withProperty(Exchange.FILE_LENGTH, cpBinaryContent.getObjectSize())*/
+                                  .withPattern(ExchangePattern.InOut)
+                                  .withBody(is)
+                                  .withHeader(S3Constants.KEY, newRelativePath)
+                                  .build();
+              Exchange result = template.send("direct:awss3", exchange);
+
+              log.debug("Result Headers: ");
+              log.debug("CamelAwsS3ETag: " + result.getOut().getHeader("CamelAwsS3ETag"));
+
+              if (result.getOut().isFault()) {
+                  throw new Exception("Some bad result: " + result.getOut().getExchange().getException());
+              }
+
           } catch (Exception e) {
               throw new StorageException("something awful happened");
           }
