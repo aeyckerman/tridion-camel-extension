@@ -3,12 +3,13 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:camel="http://camel.apache.org/schema/spring"
        xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://camel.apache.org/schema/cxf ">
     <description>This is storage layer spring context configuration</description>
 
     <context:annotation-config/>
@@ -24,6 +25,16 @@
     </bean>
 
     <!-- Amazon S3 Client Configuation -->
+<!--
+    <jaxrs:client id="awsCFClient"
+                  address="https://localhost:${port}/services/rest"
+                  serviceClass="org.apache.cxf.jaxrs.client.WebClient">
+        <jaxrs:headers>
+            <entry key="Accept" value="text/xml"/>
+        </jaxrs:headers>
+    </jaxrs:client>
+-->
+
     <bean id="s3Configuration" class="com.tridion.camel.configuration.S3Configuration">
         <property name="awsBucketName" value="${aws.bucketName}"/>
         <property name="awsAccessKey" value="${aws.accessKey}"/>
@@ -49,7 +60,7 @@
 
     <!-- Mongo DB Configuration -->
     <mongo:mongo host="${mongo.host}" port="${mongo.port}">
-      <mongo:options connections-per-host="8"
+        <mongo:options connections-per-host="8"
                        threads-allowed-to-block-for-connection-multiplier="4"
                        connect-timeout="1000"
                        max-wait-time="1500"
@@ -63,12 +74,12 @@
     </mongo:mongo>
 
     <bean id="mongodb" class="com.mongodb.MongoClient">
-       <constructor-arg name="uri">
+        <constructor-arg name="uri">
             <bean class="com.mongodb.MongoClientURI">
                 <constructor-arg name="uri" value="${mongo.uri}"/>
             </bean>
         </constructor-arg>
-   </bean>
+    </bean>
 
     <bean id="mongoConfiguration" class="com.tridion.camel.configuration.MongoConfiguration">
         <property name="mongoHost" value="${mongo.host}"/>
@@ -93,7 +104,7 @@
             <camel:package>com.tridion.camel</camel:package>
         </camel:packageScan>
         <camel:dataFormats>
-          <camel:json id="json" library="Jackson"/>
+            <camel:json id="json" library="Jackson"/>
         </camel:dataFormats>
     </camel:camelContext>
 </beans>

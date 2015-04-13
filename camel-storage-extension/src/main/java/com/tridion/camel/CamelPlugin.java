@@ -96,13 +96,13 @@ public class CamelPlugin {
         @Override
         public void configure() throws Exception {
             from("direct:awss3")
-                    .autoStartup(Boolean.valueOf("${properties:aws.autoStart}"))
-                    //.setHeader(S3Constants.KEY, method(this, "stripFirstChar(${in.header.CamelFileName})"))
-                    //.setHeader(S3Constants.KEY, simple("${properties:aws.prefix}${in.header.CamelFileName}"))
+                    .setHeader(S3Constants.ACTION_TYPE, simple("${in.header.CamelAwsS3ActionType}"))
                     .setHeader(S3Constants.KEY, method(this, "stripFirstChar(${properties:aws.prefix}${in.header.CamelFileName})"))
-                    .setHeader(S3Constants.CONTENT_LENGTH, simple("${in.header.CamelFileLength}"))
+                    //.setHeader(S3Constants.CONTENT_LENGTH, simple("${in.header.CamelAwsS3ContentLength}"))
+                    .setHeader(S3Constants.CONTENT_TYPE, simple("${in.header.CamelAwsS3ContentType}"))
+                    //.setHeader(S3Constants.CACHE_CONTROL, simple("${in.header.CamelFileLength}"))
                     .to("aws-s3://" + s3Url)
-                    .log("ETAG for saved resource is ${in.header.CamelAwsS3ETag}");
+                    .log("ETAG for saved resource is " + simple("${out.header.CamelAwsS3ETag}"));
         }
 
         public String stripFirstChar(String relativePath) {

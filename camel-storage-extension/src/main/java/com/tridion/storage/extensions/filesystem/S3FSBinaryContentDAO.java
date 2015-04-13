@@ -12,6 +12,7 @@ import org.apache.camel.ExchangePattern;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.ExchangeBuilder;
 import org.apache.camel.component.aws.s3.S3Constants;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -27,13 +28,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLConnection;
 
 @Component("S3FSBinaryContentDAO")
 @Scope("prototype")
 public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryContentDAO {
 	private  Logger log = LoggerFactory.getLogger(S3FSBinaryContentDAO.class);
 	private  String DCPINFO_EXTENSION = ".dcpinfo";
-	
+
 	public S3FSBinaryContentDAO(String storageId, String storageName, File storageLocation, FSEntityManager entityManager) {
 	    super(storageId, storageName, storageLocation, entityManager);
 	  }
@@ -47,20 +49,23 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
         BinaryContent cpBinaryContent = binaryContent;
         ByteArrayInputStream is = new ByteArrayInputStream(cpBinaryContent.getContent());
 
-
         CamelContext camelContext;
         ProducerTemplate template;
-        boolean feedback;
 
         try {
             log.info("New Binary Creation - Interesting to know");
             log.info("Storage Id: " + getStorageId());
             log.info("Storage Location: " + getStorageLocation());
+            log.info("Relative Path: " + relativePath);
             log.debug("Binding Name: " + getBindingName());
             log.debug("Type Mapping: " + getTypeMapping());
             log.debug("Class: " + getClass());
             log.info("Object Id: " + cpBinaryContent.getBinaryId());
             log.info("Object Size: " + cpBinaryContent.getObjectSize());
+
+            String mimeType= getContentType(relativePath);
+
+            log.info("Content Type: " + mimeType);
 
             camelContext = CDNFSDAOFactory.getCamelContext();
             //s3Plugin = new S3Plugin(camelContext);
@@ -68,10 +73,12 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
             template = camelContext.createProducerTemplate();
             Exchange exchange = ExchangeBuilder.anExchange(camelContext)
                                 .withProperty(Exchange.FILE_NAME, relativePath)
-                                /*.withProperty(Exchange.FILE_LENGTH, cpBinaryContent.getObjectSize())*/
                                 .withPattern(ExchangePattern.InOut)
                                 .withBody(is)
                                 .withHeader(S3Constants.KEY, relativePath)
+                                .withHeader(S3Constants.ACTION_TYPE, "create")
+                                .withHeader(S3Constants.CONTENT_TYPE, mimeType)
+                                //.withHeader(S3Constants.CONTENT_LENGTH, cpBinaryContent.getObjectSize())
                                 .build();
             Exchange result = template.send("direct:awss3", exchange);
 
@@ -85,25 +92,31 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
         } catch (Exception e) {
             throw new StorageException("something awful happened");
         } finally {
-            super.create(binaryContent, relativePath);
+            //AEY: Don't do the actual file storage, thx
+            //super.create(binaryContent, relativePath);
         }
 
         String transactionId = LocalThreadTransaction.getTransactionId();
 
         if (relativePath.endsWith(DCPINFO_EXTENSION))
         {
+          log.debug("DCPINFO_EXTENSION");
           registerDcpInfo(binaryContent,transactionId);
         }
         else
         {
           CDNFSDAOFactory.registerAction(transactionId, relativePath, CDNFSDAOFactory.Action.PERSIST);
-          log.debug("Created binary so registered PERSIST action: transaction " + transactionId + ", path " + relativePath );
+          log.debug("Created binary so registered *PERSIST* => REMOVE action: transaction " + transactionId + ", path " + relativePath );
         }
 	  }
 
 	  public void update(BinaryContent binaryContent, String originalRelativePath, String newRelativePath) throws StorageException
 	  {
           BinaryContent cpBinaryContent = binaryContent;
+          ByteArrayInputStream is = new ByteArrayInputStream(cpBinaryContent.getContent());
+
+          CamelContext camelContext;
+          ProducerTemplate template;
 
           try {
               log.info("Existing Binary Update - Interesting to know");
@@ -114,11 +127,39 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
               log.debug("Class: " + getClass());
               log.info("Object Id: " + cpBinaryContent.getBinaryId());
               log.info("Object Size: " + cpBinaryContent.getObjectSize());
+
+              String mimeType= getContentType(newRelativePath);
+
+              log.info("Content Type: " + mimeType);
+
+              camelContext = CDNFSDAOFactory.getCamelContext();
+
+              template = camelContext.createProducerTemplate();
+              Exchange exchange = ExchangeBuilder.anExchange(camelContext)
+                                  .withProperty(Exchange.FILE_NAME, newRelativePath)
+                                  .withPattern(ExchangePattern.InOut)
+                                  .withBody(is)
+                                  .withHeader(S3Constants.KEY, newRelativePath)
+                                  .withHeader(S3Constants.ACTION_TYPE, "create")
+                                  .withHeader(S3Constants.CONTENT_TYPE, mimeType)
+                                  //.withHeader(S3Constants.CONTENT_LENGTH, cpBinaryContent.getObjectSize())
+                                  .build();
+
+              Exchange result = template.send("direct:awss3", exchange);
+
+              log.debug("Result Headers: ");
+              log.debug("CamelAwsS3ETag: " + result.getOut().getHeader("CamelAwsS3ETag"));
+
+              if (result.getOut().isFault()) {
+                  throw new Exception("Some bad result: " + result.getOut().getExchange().getException());
+              }
+
           } catch (Exception e) {
               throw new StorageException("something awful happened");
           }
 
-		  super.update(binaryContent, originalRelativePath, newRelativePath);
+          //AEY: Don't do the actual file storage, thx
+		  //super.update(binaryContent, originalRelativePath, newRelativePath);
 		  String transactionId = LocalThreadTransaction.getTransactionId();
 		  if (newRelativePath.endsWith(DCPINFO_EXTENSION))
 		  {
@@ -137,78 +178,125 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
 		
 	  }
 
-	  
 
 	public void remove(int publicationId, int binaryId, String variantId, String relativePath)  throws StorageException
 	  {
-		  super.remove(publicationId, relativePath);
-		  String transactionId = LocalThreadTransaction.getTransactionId();
-		  if (relativePath.endsWith(DCPINFO_EXTENSION))
-		  {
-			  File storageRoot = getStorageLocation(publicationId);
-			  File target = new File(storageRoot, relativePath);
-			  registerDcpInfo(target,transactionId);
-		  }
-		  else
-		  {
-			  CDNFSDAOFactory.registerAction(transactionId, relativePath, CDNFSDAOFactory.Action.REMOVE);
-			  log.debug("Removed binary so registered REMOVE action: transaction " + transactionId + ", path " + relativePath );
-		  }
-	  }
-	  
-	  private void registerDcpInfo(File dcpInfoFile, String transactionId) 
-	  {
-		  DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-          DocumentBuilder docBuilder;
-          try {
-			docBuilder = docBuilderFactory.newDocumentBuilder();
-			try {
-				Document doc = docBuilder.parse (dcpInfoFile);
-				registerDcpInfo(doc,transactionId);
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	  }
-	  
-	  private void registerDcpInfo(BinaryContent binaryContent, String transactionId) 
-	  {
-		  DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-          DocumentBuilder docBuilder;
-          try {
-			docBuilder = docBuilderFactory.newDocumentBuilder();
-			try {
-				Document doc = docBuilder.parse(new ByteArrayInputStream(binaryContent.getContent()));
-				registerDcpInfo(doc,transactionId);
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	  }
-	  
-	  private void registerDcpInfo(Document doc, String transactionId)
-	  {
-		  NodeList listOfPages = doc.getElementsByTagName("page");
-          for(int i=0; i<listOfPages.getLength() ; i++)
-          {
-              Node page = listOfPages.item(i);
-              String url = page.getAttributes().getNamedItem("url").getNodeValue();
-              CDNFSDAOFactory.registerAction(transactionId, url, CDNFSDAOFactory.Action.PERSIST);
-			  log.debug("Found DCP info binary so registered PERSIST action: transaction " + transactionId + ", page " + url );
+
+          CamelContext camelContext;
+          ProducerTemplate template;
+
+          try{
+              log.info("Remove Existing Binary");
+              log.info("Storage Id: " + getStorageId());
+              log.info("Storage Location: " + getStorageLocation());
+              log.debug("Binding Name: " + getBindingName());
+              log.debug("Type Mapping: " + getTypeMapping());
+              log.debug("Class: " + getClass());
+              log.info("Object Id: " + binaryId);
+              log.info("Variant Id: " + variantId);
+
+              camelContext = CDNFSDAOFactory.getCamelContext();
+
+              template = camelContext.createProducerTemplate();
+              Exchange exchange = ExchangeBuilder.anExchange(camelContext)
+                                  .withProperty(Exchange.FILE_NAME, relativePath)
+                                  .withPattern(ExchangePattern.InOut)
+                                  .withHeader(S3Constants.KEY, relativePath)
+                                  .withHeader(S3Constants.ACTION_TYPE, "remove")
+                                  .build();
+              Exchange result = template.send("direct:awss3", exchange);
+
+              log.debug("Result Headers: ");
+              log.debug("CamelAwsS3ETag: " + result.getOut().getHeader("CamelAwsS3ETag"));
+
+              if (result.getOut().isFault()) {
+                  throw new Exception("Some bad result: " + result.getOut().getExchange().getException());
+              }
+
+
+          } catch(Exception e) {
+              throw new StorageException("Camel route failed, abort the transaction");
+          } finally {
+              super.remove(publicationId, relativePath);
           }
+
+          String transactionId = LocalThreadTransaction.getTransactionId();
+          if (relativePath.endsWith(DCPINFO_EXTENSION))
+          {
+              File storageRoot = getStorageLocation(publicationId);
+              File target = new File(storageRoot, relativePath);
+
+              registerDcpInfo(target,transactionId);
+          }
+          else
+          {
+              CDNFSDAOFactory.registerAction(transactionId, relativePath, CDNFSDAOFactory.Action.REMOVE);
+              log.debug("Removed binary so registered REMOVE action: transaction " + transactionId + ", path " + relativePath );
+          }
+
 	  }
+	  
+    private void registerDcpInfo(File dcpInfoFile, String transactionId)
+    {
+      DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder;
+      try {
+        docBuilder = docBuilderFactory.newDocumentBuilder();
+        try {
+            Document doc = docBuilder.parse (dcpInfoFile);
+            registerDcpInfo(doc,transactionId);
+        } catch (SAXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        } catch (ParserConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+	  
+    private void registerDcpInfo(BinaryContent binaryContent, String transactionId)
+    {
+      DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder;
+      try {
+        docBuilder = docBuilderFactory.newDocumentBuilder();
+        try {
+            Document doc = docBuilder.parse(new ByteArrayInputStream(binaryContent.getContent()));
+            registerDcpInfo(doc,transactionId);
+        } catch (SAXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        } catch (ParserConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+	  
+    private void registerDcpInfo(Document doc, String transactionId)
+    {
+      NodeList listOfPages = doc.getElementsByTagName("page");
+      for(int i=0; i<listOfPages.getLength() ; i++)
+      {
+          Node page = listOfPages.item(i);
+          String url = page.getAttributes().getNamedItem("url").getNodeValue();
+          CDNFSDAOFactory.registerAction(transactionId, url, CDNFSDAOFactory.Action.PERSIST);
+          log.debug("Found DCP info binary so registered PERSIST action: transaction " + transactionId + ", page " + url );
+      }
+    }
+
+    private String getContentType(String path) {
+        String result = URLConnection.guessContentTypeFromName(path);
+        if (result == null) {
+            result = Mime.getMime(FilenameUtils.getExtension(path));
+        }
+        return result;
+    }
 }

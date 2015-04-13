@@ -9,9 +9,9 @@
     </parent>
 
     <groupId>com.tridion.storage</groupId>
-    <artifactId>camel-extension</artifactId>
+    <artifactId>tridion-storage-extension</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.4-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
     <name>Camel Storage Extension (S3 and Mongo)</name>
     <url>http://maven.apache.org</url>
 
@@ -100,7 +100,6 @@
           <artifactId>easy-license</artifactId>
           <version>25.0</version>
         </dependency>
-
         <!--CAMEL FRAMEWORK-->
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -130,11 +129,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-aws</artifactId>
             <version>${camel.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-mongodb</artifactId>
@@ -262,6 +261,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
     </dependencies>
 
@@ -398,7 +402,7 @@
     </profiles>
 
     <build>
-        <defaultGoal>install</defaultGoal>
+        <defaultGoal>package</defaultGoal>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

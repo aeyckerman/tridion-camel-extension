@@ -76,7 +76,8 @@ public class S3FSPageDAO extends FSPageDAO implements PageDAO {
         } catch (Exception e) {
             throw new StorageException("Camel route failed, abort the transaction");
         } finally {
-            super.create(page, relativePath);
+            //AEY: Don't do the actual file storage, thx
+            //super.create(page, relativePath);
         }
 
 
@@ -108,8 +109,8 @@ public class S3FSPageDAO extends FSPageDAO implements PageDAO {
         } catch (Exception e) {
             throw new StorageException("Camel route failed, abort the extension");
         }
-
-		super.update(page, originalRelativePath, newRelativePath);
+        //AEY: Don't do the actual file storage, thx
+		//super.update(page, originalRelativePath, newRelativePath);
 		String transactionId = LocalThreadTransaction.getTransactionId();
 		//the super class will do a create, so we don't need to do anything unless the file name has changed 
 		//(in which case we need to register a remove for the old path)
