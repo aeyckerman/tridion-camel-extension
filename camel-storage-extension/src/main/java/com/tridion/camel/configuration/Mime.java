@@ -1,4 +1,4 @@
-package com.tridion.storage.extensions.filesystem;
+package com.tridion.camel.configuration;
 
 import java.util.Properties;
 

@@ -1,6 +1,7 @@
 package com.tridion.storage.extensions.filesystem;
 
 import com.tridion.broker.StorageException;
+import com.tridion.camel.configuration.Mime;
 import com.tridion.storage.BinaryContent;
 import com.tridion.storage.dao.BinaryContentDAO;
 import com.tridion.storage.filesystem.FSBinaryContentDAO;
