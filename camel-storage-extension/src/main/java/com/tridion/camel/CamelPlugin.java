@@ -89,7 +89,7 @@ public class CamelPlugin {
 
         public S3RouteBuilder(S3Configuration s3Configuration) {
             this.s3Url =  s3Configuration.getAwsBucketName()
-                    + "?amazonS3Client=#s3AmazonClient";
+                    + "?amazonS3Client=#s3AmazonClient&multiPartUpload=true";
         }
 
 

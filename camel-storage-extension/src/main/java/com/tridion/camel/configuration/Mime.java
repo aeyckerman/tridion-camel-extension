@@ -146,6 +146,7 @@ public class Mime {
     mimeMap.put("svg", "image/svg+xml");
     mimeMap.put("svgz", "image/svg+xml");
     mimeMap.put("wbmp", "image/vnd.wap.wbmp");
+    mimeMap.put("webm", "video/webm");
     mimeMap.put("wml", "text/vnd.wap.wml");
     mimeMap.put("wmlc", "application/vnd.wap.wmlc");
     mimeMap.put("wmls", "text/vnd.wap.wmlscript");
