@@ -4,9 +4,11 @@ import com.tridion.broker.StorageException;
 import com.tridion.camel.configuration.Mime;
 import com.tridion.storage.BinaryContent;
 import com.tridion.storage.dao.BinaryContentDAO;
+import com.tridion.storage.extensions.util.DeployerConstants;
 import com.tridion.storage.filesystem.FSBinaryContentDAO;
 import com.tridion.storage.filesystem.FSEntityManager;
 import com.tridion.storage.services.LocalThreadTransaction;
+import com.tridion.util.FileUtils;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
@@ -47,8 +49,8 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
 
 	  public void create(BinaryContent binaryContent, String relativePath)  throws StorageException
 	  {
-        BinaryContent cpBinaryContent = binaryContent;
-        ByteArrayInputStream is = new ByteArrayInputStream(cpBinaryContent.getContent());
+        ByteArrayInputStream is = new ByteArrayInputStream(binaryContent.getContent());
+        File temp = null;
 
         CamelContext camelContext;
         ProducerTemplate template;
@@ -61,23 +63,24 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
             log.debug("Binding Name: " + getBindingName());
             log.debug("Type Mapping: " + getTypeMapping());
             log.debug("Class: " + getClass());
-            log.info("Object Id: " + cpBinaryContent.getBinaryId());
-            log.info("Object Size: " + cpBinaryContent.getObjectSize());
+            log.info("Object Id: " + binaryContent.getBinaryId());
+            log.info("Object Size: " + binaryContent.getObjectSize());
 
+            temp = File.createTempFile("binary",".tmp");
+            FileUtils.copy(is,temp);
             String mimeType= getContentType(relativePath);
 
             log.info("Content Type: " + mimeType);
 
             camelContext = CDNFSDAOFactory.getCamelContext();
-            //s3Plugin = new S3Plugin(camelContext);
 
             template = camelContext.createProducerTemplate();
             Exchange exchange = ExchangeBuilder.anExchange(camelContext)
                                 .withProperty(Exchange.FILE_NAME, relativePath)
                                 .withPattern(ExchangePattern.InOut)
-                                .withBody(is)
+                                .withBody(temp)
                                 .withHeader(S3Constants.KEY, relativePath)
-                                .withHeader(S3Constants.ACTION_TYPE, "create")
+                                .withHeader(DeployerConstants.ACTION, "create")
                                 .withHeader(S3Constants.CONTENT_TYPE, mimeType)
                                 //.withHeader(S3Constants.CONTENT_LENGTH, cpBinaryContent.getObjectSize())
                                 .build();
@@ -95,6 +98,8 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
         } finally {
             //AEY: Don't do the actual file storage, thx
             //super.create(binaryContent, relativePath);
+            log.debug("Remove temporary file " + temp.getPath());
+            temp.delete();
         }
 
         String transactionId = LocalThreadTransaction.getTransactionId();
@@ -113,8 +118,8 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
 
 	  public void update(BinaryContent binaryContent, String originalRelativePath, String newRelativePath) throws StorageException
 	  {
-          BinaryContent cpBinaryContent = binaryContent;
-          ByteArrayInputStream is = new ByteArrayInputStream(cpBinaryContent.getContent());
+          ByteArrayInputStream is = new ByteArrayInputStream(binaryContent.getContent());
+          File temp = null;
 
           CamelContext camelContext;
           ProducerTemplate template;
@@ -126,9 +131,11 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
               log.debug("Binding Name: " + getBindingName());
               log.debug("Type Mapping: " + getTypeMapping());
               log.debug("Class: " + getClass());
-              log.info("Object Id: " + cpBinaryContent.getBinaryId());
-              log.info("Object Size: " + cpBinaryContent.getObjectSize());
+              log.info("Object Id: " + binaryContent.getBinaryId());
+              log.info("Object Size: " + binaryContent.getObjectSize());
 
+              temp = File.createTempFile("binary",".tmp");
+              FileUtils.copy(is,temp);
               String mimeType= getContentType(newRelativePath);
 
               log.info("Content Type: " + mimeType);
@@ -139,9 +146,9 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
               Exchange exchange = ExchangeBuilder.anExchange(camelContext)
                                   .withProperty(Exchange.FILE_NAME, newRelativePath)
                                   .withPattern(ExchangePattern.InOut)
-                                  .withBody(is)
+                                  .withBody(temp)
                                   .withHeader(S3Constants.KEY, newRelativePath)
-                                  .withHeader(S3Constants.ACTION_TYPE, "create")
+                                  .withHeader(DeployerConstants.ACTION, "create")
                                   .withHeader(S3Constants.CONTENT_TYPE, mimeType)
                                   //.withHeader(S3Constants.CONTENT_LENGTH, cpBinaryContent.getObjectSize())
                                   .build();
@@ -157,6 +164,9 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
 
           } catch (Exception e) {
               throw new StorageException("something awful happened");
+          } finally {
+              log.debug("Remove temporary file " + temp.getPath());
+              temp.delete();
           }
 
           //AEY: Don't do the actual file storage, thx
@@ -203,7 +213,7 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
                                   .withProperty(Exchange.FILE_NAME, relativePath)
                                   .withPattern(ExchangePattern.InOut)
                                   .withHeader(S3Constants.KEY, relativePath)
-                                  .withHeader(S3Constants.ACTION_TYPE, "remove")
+                                  .withHeader(DeployerConstants.ACTION, "remove")
                                   .build();
               Exchange result = template.send("direct:awss3", exchange);
 

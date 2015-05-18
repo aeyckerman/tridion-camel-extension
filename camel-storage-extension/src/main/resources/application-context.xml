@@ -54,8 +54,8 @@
     </bean>
 
     <bean id="configurationOptions" class="com.amazonaws.ClientConfiguration">
-<!--        <property name="proxyHost" value="${aws.proxyHost}"/>
-        <property name="proxyPort" value="${aws.proxyPort}"/>-->
+        <property name="proxyHost" value="${aws.proxyHost}"/>
+        <property name="proxyPort" value="${aws.proxyPort}"/>
     </bean>
 
     <!-- Mongo DB Configuration -->

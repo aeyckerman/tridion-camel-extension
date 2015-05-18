@@ -6,6 +6,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.tridion.camel.configuration.MongoConfiguration;
 import com.tridion.camel.configuration.S3Configuration;
+import com.tridion.storage.extensions.util.DeployerConstants;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -96,7 +97,7 @@ public class CamelPlugin {
         @Override
         public void configure() throws Exception {
             from("direct:awss3")
-                    .setHeader(S3Constants.ACTION_TYPE, simple("${in.header.CamelAwsS3ActionType}"))
+                    .setHeader(DeployerConstants.ACTION, simple("${in.header.DeployerAction}"))
                     .setHeader(S3Constants.KEY, method(this, "stripFirstChar(${properties:aws.prefix}${in.header.CamelFileName})"))
                     //.setHeader(S3Constants.CONTENT_LENGTH, simple("${in.header.CamelAwsS3ContentLength}"))
                     .setHeader(S3Constants.CONTENT_TYPE, simple("${in.header.CamelAwsS3ContentType}"))

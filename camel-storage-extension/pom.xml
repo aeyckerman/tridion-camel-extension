@@ -21,9 +21,9 @@
         <build.time>pc-build-now</build.time>
     
         <activemq.version>5.3.2</activemq.version>
-        <amazon.version>1.8.9.1</amazon.version>
+        <amazon.version>1.9.16</amazon.version>
         <c3p0.version>0.9.1</c3p0.version>
-        <camel.version>2.12.3</camel.version>
+        <camel.version>2.15.2</camel.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <enforcer.version>1.0.1</enforcer.version>
         <hibernate.version>3.6.3.Final</hibernate.version>
@@ -129,11 +129,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-<!--        <dependency>
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-aws</artifactId>
             <version>${camel.version}</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-mongodb</artifactId>
