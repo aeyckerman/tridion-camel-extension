@@ -112,7 +112,7 @@ public class S3FSBinaryContentDAO extends FSBinaryContentDAO implements BinaryCo
         else
         {
           CDNFSDAOFactory.registerAction(transactionId, relativePath, CDNFSDAOFactory.Action.PERSIST);
-          log.debug("Created binary so registered *PERSIST* => REMOVE action: transaction " + transactionId + ", path " + relativePath );
+          log.debug("Created binary so registered *PERSIST* => CREATE action: transaction " + transactionId + ", path " + relativePath );
         }
 	  }
 

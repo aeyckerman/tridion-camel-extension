@@ -3,13 +3,10 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:camel="http://camel.apache.org/schema/spring"
        xmlns:mongo="http://www.springframework.org/schema/data/mongo"
-       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
-       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-       http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://camel.apache.org/schema/cxf ">
+       http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
     <description>This is storage layer spring context configuration</description>
 
     <context:annotation-config/>
@@ -54,8 +51,8 @@
     </bean>
 
     <bean id="configurationOptions" class="com.amazonaws.ClientConfiguration">
-        <property name="proxyHost" value="${aws.proxyHost}"/>
-        <property name="proxyPort" value="${aws.proxyPort}"/>
+<!--        <property name="proxyHost" value="${aws.proxyHost}"/>
+        <property name="proxyPort" value="${aws.proxyPort}"/>-->
     </bean>
 
     <!-- Mongo DB Configuration -->

@@ -11,7 +11,7 @@
     <groupId>com.tridion.storage</groupId>
     <artifactId>tridion-storage-extension</artifactId>
     <packaging>jar</packaging>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
     <name>Camel Storage Extension (S3 and Mongo)</name>
     <url>http://maven.apache.org</url>
 
@@ -191,16 +191,19 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
-
-
         <!--TEST DATABASE-->
-        <dependency>
+<!--        <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>2.0.0</version>
             <scope>test</scope>
+        </dependency>-->
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <version>1.47.3</version>
+            <scope>test</scope>
         </dependency>
-
         <!--LOGGING-->
         <dependency>
           <groupId>ch.qos.logback</groupId>
